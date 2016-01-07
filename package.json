@@ -1,0 +1,27 @@
+{
+  "name": "kin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "prestart": "webpack",
+    "start": "node ./server/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.3",
+    "react": "^0.14.5",
+    "react-dom": "^0.14.5",
+    "socket.io": "^1.3.7",
+    "socket.io-client": "^1.3.7",
+    "thinky": "^2.2.3"
+  },
+  "devDependencies": {
+    "babel-core": "^6.3.26",
+    "babel-loader": "^6.2.0",
+    "babel-preset-react": "^6.3.13",
+    "webpack": "^1.12.9"
+  }
+}

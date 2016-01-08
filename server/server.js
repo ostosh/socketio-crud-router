@@ -11,7 +11,7 @@ var controllerDefinitions = require('./controller/definitions');
 var connectionsController = require('./controller/connections');
 
 var conn = require('./util/thinky');
-var model = require('./model/init');
+var models = require('./model/init');
 
 //init socket controller
 function initSockets(io){

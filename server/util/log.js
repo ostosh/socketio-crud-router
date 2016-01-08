@@ -1,10 +1,7 @@
-
-if (!Date.now) {
-    Date.now = function() { return new Date().getTime(); }
-}
+var time = require('./time');
 
 function log(type, message){
-  console.log(Date.now() + ' [' + type + ']: ' + message);
+  console.log(time.now() + ' [' + type + ']: ' + message);
 }
 
 module.exports = {

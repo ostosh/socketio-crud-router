@@ -1,5 +1,4 @@
-var model = require('./model/init');
-
+var models = require('../model/init');
 
 var log = require('../util/log');
 var logInfo = log.logInfo;
@@ -7,67 +6,94 @@ var logError = log.logError;
 var logException = log.logException;
 
 
-
 function getModel(sig){
-  return model[sig['model']];
+  return models[sig['model']];
 }
 
 function getEvent(sig) {
   var e = sig['opt'] + ':'; 
   e += sig['endPoint'] + ':';
-  e += sig['key'];
+  e += sig['model'];
   return e;
 };
 
+function handleSucess(conn, msg, sig){
+  return function(res){
+    var e = getEvent(sig);
+    conn.sendSucess(e, {'sig': sig});
+  }
+}
+function handleResponse(conn, msg, sig){
+  return function(res){
+    var e = getEvent(sig);
+    conn.sendResp(e, {'sig': sig, 'content': res});
+  }
+}
+function handleError(conn, msg, sig){
+  return function(res){
+    var e = getEvent(sig);
+    conn.sendError(e, {'sig': sig});
+    logException(msg + ' ' +res);
+  }
+}
+
 function create(conn){
   return function(data){
-    var model = getModel(data['sig']);
-    var e = getEvent(data['sig']);
+    logInfo('create request recieved ' + data['sig']['endPoint']);
     try{
-      model.create(data['content']);
+      var model = getModel(data['sig']);
+      var result = model.create(data);
+      result
+        .then(handleSucess(conn, '', data['sig']))
+        .error(handleError(conn, 'cannot process api create /', data['sig']));
     }catch(err){
-      conn['socket'].sendError(e);
+      handleError(conn, 'cannot process api create /', data['sig']);
     }
-    conn['socket'].sendSucess(e);
   }
 }
 
 function read(conn){
   return function(data){
-    var model = getModel(data['sig']);
-    var e = getEvent(data['sig']);
+    logInfo('read request recieved ' + data['sig']['endPoint']);
     try{
-      var record = model.read(data['content']);
+      var model = getModel(data['sig']);
+      var result = model.read(data['content']);
+      result
+        .then(handleSucess(conn, '', data['sig']))
+        .error(handleError(conn, 'cannot process api read /', data['sig']));
     }catch(err){
-      conn['socket'].sendError(e);
+      handleError(conn, 'cannot process api read /', data['sig']);
     }
-    conn['socket'].sendResp(e, record);
   }
 }
 
 function update(conn){
   return function(data){
-    var model = getModel(data['sig']);
-    var e = getEvent(data['sig']);
+    logInfo('update request recieved ' + data['sig']['endPoint']);
     try{
-      model.update(data['content']);
+      var model = getModel(data['sig']);
+      var result = model.update(data['content']);
+      result
+        .then(handleSucess(conn, '', data['sig']))
+        .error(handleError(conn, 'cannot process api update /', data['sig']));
     }catch(err){
-      conn['socket'].sendError(e);
+      handleError(conn, 'cannot process api update /', data['sig']);
     }
-    conn['socket'].sendSucess(e);
   }
 }
 
 function remove(conn){
   return function(data){
-    var model = getModel(data['sig']);
-    var e = getEvent(data['sig']);
+    logInfo('delete request recieved ' + data['sig']['endPoint']);
     try{
-      model.remove(data['content']);
+      var model = getModel(data['sig']);
+      var result = model.remove(data['content']);
+      result
+        .then(handleSucess(conn, '', data['sig']))
+        .error(handleError(conn, 'cannot process api delete /', data['sig']));
     }catch(err){
-      conn['socket'].sendError(e);
+      handleError(conn, 'cannot process api delete /', data['sig']);
     }
-    conn['socket'].sendSucess(e);
   }
 }
 

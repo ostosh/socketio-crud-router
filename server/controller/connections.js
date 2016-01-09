@@ -8,20 +8,46 @@ var api = require('./api');
 function Connection(socket){
   this.socket = socket;
 }
-
+Connection.prototype.getEvent = function(sig) {
+  var e = sig['opt'] + ':'; 
+  e += sig['endPoint'] + ':';
+  e += sig['model'];
+  return e;
+};
 Connection.prototype.send = function(ns, data){
-    this.socket.emit(ns, data);
+ this.socket.emit(ns, data);
 };
 Connection.prototype.sendError = function(ns, data){
-    this.send(ns, {'sig' : data['sig'], 'success' : false});
+  this.send(ns, {'sig' : data['sig'], 'success' : false});
 };
 Connection.prototype.sendSucess = function(ns, data){
-    this.send(ns, {'sig' : data['sig'], 'success' : true});
+  this.send(ns, {'sig' : data['sig'], 'success' : true});
 };
 Connection.prototype.sendResp = function(ns, data){
-    this.send(ns, {content : data});
-}; 
-
+  this.send(ns, {content : data});
+};
+Connection.prototype.handleError = function(msg, sig){
+  var conn = this;
+  return function(res){    
+    var e = conn.getEvent(sig);
+    conn.sendError(e, {'sig': sig});
+    logException(msg + ' ' +res);
+  }
+};
+Connection.prototype.handleSucess = function (msg, sig){
+  var conn = this;
+  return function(res){
+    var e = conn.getEvent(sig);
+    conn.sendSucess(e, {'sig': sig});
+  }
+};
+Connection.prototype.handleResponse = function(msg, sig){
+  var conn = this;
+  return function(res){
+    var e = conn.getEvent(sig);
+    conn.sendResp(e, {'sig': sig, 'content': res});
+  }
+};
 
 //temp in mem holder for connections
 var connections = {};
@@ -47,6 +73,9 @@ function processConnect(socket){
     logInfo('connected '+ conn['socket']['id'] + ' ' + count + ' outstanding');
     socket.on(controllerDefinitions.disconnect, processDisconnect(conn));
     socket.on(controllerDefinitions.create, api.create(conn));
+    socket.on(controllerDefinitions.read, api.read(conn));
+    socket.on(controllerDefinitions.update, api.update(conn));
+    socket.on(controllerDefinitions.remove, api.remove(conn));
   }
 }
 

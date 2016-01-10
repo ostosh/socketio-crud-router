@@ -10,7 +10,6 @@ function getModel(sig){
   return models[sig['model']];
 }
 
-
 function create(conn){
   return function(req){
     logInfo('create request recieved ' + req['sig']['endPoint']);
@@ -27,8 +26,8 @@ function read(conn){
   return function(req){
     logInfo('read request recieved ' + req['sig']['endPoint']);
     try{
-      var model = getModel(conn, req['sig']);
-      model.read(req);
+      var model = getModel(req['sig']);
+      model.read(conn, req);
     }catch(err){
       conn.handleError('cannot process api read /', req['sig']);
     }

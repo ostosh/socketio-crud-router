@@ -16,5 +16,4 @@ module.exports = {
   logException: function (message){
     log('EXCEPTION', message);
   }
-
 };

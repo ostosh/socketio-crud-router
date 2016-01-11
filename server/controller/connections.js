@@ -3,7 +3,7 @@ var log = require('../util/log'),
     logError = log.logError,
     logException = log.logException;
 var controllerDefinitions = require('./definitions');
-var api = require('./api');
+var api = require('./api').init({models:'/server/model/init'});
 
 function Connection(socket){
   this.socket = socket;
